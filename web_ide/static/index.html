@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANSER QBot 2 | QUARC Simulation Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js for 3D Simulation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="sim-canvas"></div>
+    
+    <!-- HUD Overlay -->
+    <div class="hud">
+        <div class="hud-header">
+            <i class="fa-solid fa-robot"></i> QUANSER QBot 2 for QUARC
+            <span class="status online">● Connected</span>
+        </div>
+
+        <div class="hud-tabs">
+            <div class="tab-btn active" onclick="switchTab('live')"><i class="fa-solid fa-gauge-high"></i> Dashboard</div>
+            <div class="tab-btn" onclick="switchTab('mapping')"><i class="fa-solid fa-map"></i> 3D Mapping</div>
+        </div>
+        
+        <div id="tab-live" class="tab-section active">
+            <div class="hud-panel">
+                <div class="section-title">Robot FPV Camera</div>
+                <div id="fpv-container">
+                    <div class="fpv-crosshair">+</div>
+                    <div class="fpv-scanline"></div>
+                </div>
+            </div>
+            
+            <div class="hud-panel">
+                <div class="section-title">Live Sensor Data</div>
+                <div class="sensor-readings">
+                    <div class="sensor-row"><span>Position:</span> <span id="val-pos">X: 0.00 | Z: 0.00</span></div>
+                    <div class="sensor-row"><span>Heading:</span> <span id="val-head">0.00°</span></div>
+                    <div class="sensor-row"><span>Collision:</span> <span id="val-col" class="safe">CLEAR</span></div>
+                    <div class="sensor-row"><span>Current Zone:</span> <span id="val-zone">Unmarked</span></div>
+                    <div class="sensor-row"><span>LiDAR Ping (Fwd):</span> <span id="val-lidar">0.00m</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-mapping" class="tab-section">
+            <div class="hud-panel">
+                <div class="section-title">3D SLAM Reconstruction</div>
+                <div id="map-canvas-container">
+                    <div id="map-canvas"></div>
+                </div>
+                <div class="mapping-stats">
+                    <div class="sensor-row"><span>Mapped Points:</span> <span id="map-pts">0</span></div>
+                    <div class="sensor-row"><span>Voxel Volume:</span> <span id="map-vox">0</span></div>
+                </div>
+                <button class="action-btn" onclick="resetMapData()"><i class="fa-solid fa-trash-can"></i> Clear Reconstruction</button>
+            </div>
+        </div>
+        
+        <div class="hud-panel terminal" id="log-panel">
+            <div class="section-title">Telemetry & Logs</div>
+            <div id="telemetry-output">Awaiting VS Code connection...</div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
