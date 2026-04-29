@@ -1,0 +1,81 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\title{\textbf{ACSAR-E: Real-World Implementation \& Simulation Mapping Proposal}}
+\author{Autonomous Unitree Go2 Security \& Patrol Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Overview}
+\textbf{Phase:} Simulation Validation \& Hardware Translation
+
+\section{Spatial Awareness \& Conditional Zone Detection}
+In our \textit{Gazebo-Lite} simulation, we utilized mathematical 3D bounding boxes (AABB) and Three.js Raycasting to determine if the robot entered ``Restricted Zones.'' To deploy this in real life:
+
+\begin{itemize}
+    \item \textbf{Real-World Implementation (Geofencing via SLAM):} We will use the Unitree Go2's onboard \textbf{SLAM (Simultaneous Localization and Mapping)} capabilities. The robot generates a persistent 3D point-cloud map of the physical office.
+    \item \textbf{Coordinate Translation:} We map our physical office blueprint to an absolute coordinate system (e.g., origin $(0,0)$ at the charging dock). Conditional zones (like the \textit{High Voltage Lab}) are defined as Cartesian boundary polygons $[(x_1, z_1), (x_2, z_2)...]$ in a Python config file.
+    \item \textbf{Trigger Logic:} The real robot's odometry data continuously feeds its current $[X, Y, Z]$ position to our Python script. A simple Point-in-Polygon (PiP) algorithm checks if the robot's real-time coordinate falls inside a restricted polygon, instantly triggering the policy violation alerts.
+\end{itemize}
+
+\section{Dynamic Obstacle Avoidance \& Human Interaction (YOLO)}
+Our current simulation uses A* to navigate static walls, and a LiDAR failsafe to stop before crashing. In a real office, humans move dynamically.
+
+\begin{itemize}
+    \item \textbf{The Problem:} A* calculates paths assuming the world is frozen. If a human walks into the corridor, A* will fail or the robot will abruptly emergency-stop.
+    \item \textbf{The Solution (YOLOv8 + LiDAR Fusion):} We will intercept the RTSP video stream from the Go2's front-facing camera and feed it into a \textbf{YOLOv8 Object Detection} neural network running on an edge-compute node (like a Jetson Orin or the onboard high-performance computer).
+    \item \textbf{How it Works:}
+    \begin{enumerate}
+        \item YOLO detects a bounding box labeled \texttt{person}.
+        \item We overlay that bounding box onto the hardware LiDAR depth-map to extract the precise distance and vector of the human.
+        \item We dynamically inject a high-cost ``temporary obstacle blob'' into the robot's local Costmap.
+        \item The robot smoothly arcs around the moving human instead of stopping, utilizing a local trajectory planner (like DWA - Dynamic Window Approach) while maintaining its global A* trajectory.
+    \end{enumerate}
+\end{itemize}
+
+\section{Advanced Routing: Water Flow vs. Quantum-Inspired Search}
+While A* is perfect for Point A to Point B, patrolling a dynamic security environment requires more organic algorithms.
+
+\begin{itemize}
+    \item \textbf{Water Flow Algorithm (Wavefront/Brushfire):} Instead of calculating a single thin line, the Water Flow algorithm simulates pouring water from the robot's location. The ``water'' fills the corridors based on terrain costs. This is exceptionally powerful for \textbf{Exploration and Sweeping}. If we need the robot to search an entire room for anomalies, Water Flow guarantees 100\% floor-plan coverage without redundant overlapping.
+    \item \textbf{Quantum-Inspired Search Optimization:} If the robot needs to patrol 50 different high-risk waypoints (Server racks, doors, windows), finding the absolute fastest route is the ``Traveling Salesman Problem'' (highly computationally expensive). Quantum-inspired algorithms (like Q-Learning or Quantum Annealing simulations) evaluate multiple routing probabilities simultaneously. We can deploy a cloud-based quantum-inspired solver to recalculate the robot's patrol route every 5 minutes based on dynamic heatmaps (e.g., routing the robot to areas where YOLO detected the most human foot traffic earlier in the day).
+\end{itemize}
+
+\section{Phase Execution: From Simulation to Hardware}
+Our Python simulation architecture was intentionally designed to perfectly mirror the real-world deployment.
+
+\subsection{Phase 1: Virtual Validation (Complete)}
+We have successfully built \texttt{unitree\_sim.py}, which acts as a virtual SDK. Our \texttt{test\_run.py} script proves that a standalone Python loop can ingest real-time LiDAR telemetry, calculate distances, and send asynchronous movement commands to a 3D robot over WebSockets.
+
+\subsection{Phase 2: Hardware API Bridge (Upcoming)}
+To run \texttt{test\_run.py} on the physical Unitree Go2, we only need to swap the \texttt{Go2Sim} import with the official Unitree SDK.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small, frame=single, breaklines=true]
+# Simulation Code
+from unitree_sim import Go2Sim 
+robot = Go2Sim()
+
+# Real-Life Code (Swapped)
+from unitree_sdk2 import Go2Hardware
+robot = Go2Hardware(ip="192.168.123.161")
+\end{lstlisting}
+
+Because we adhered to standard generic function calls (\texttt{get\_lidar\_front()}, \texttt{get\_position()}, \texttt{move\_to()}), the Python logic \textbf{does not need to change}. The official Unitree SDK will simply translate our \texttt{move\_to(x, z)} commands into native CAN-bus motor torques.
+
+\subsection{Phase 3: Edge AI Deployment}
+\begin{enumerate}
+    \item Load the mapped office SLAM data into the Go2.
+    \item Deploy the \texttt{test\_run.py} (with YOLO integrated) onto an NVIDIA Jetson mounted to the robot's back.
+    \item The Jetson handles heavy YOLO processing and Water Flow routing, feeding lightweight movement vectors directly into the Go2's movement controller.
+\end{enumerate}
+
+\end{document}
