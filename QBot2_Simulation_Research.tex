@@ -1,0 +1,163 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\title{\textbf{Advanced Autonomous Mapping and Navigation Simulation for the QUANSER QBot 2 for QUARC}}
+\author{Research and Implementation Documentation}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document details the development of a high-fidelity 3D simulation and research platform for the QUANSER QBot 2 differential-drive robot. The project integrates real-time SLAM-inspired mapping, persistent point cloud accumulation, and A* pathfinding algorithms within a modern web-based dashboard architecture. The system enables robust testing of autonomous navigation logic in complex maze environments prior to hardware deployment.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+The transition from quadrupedal platforms to differential-drive wheeled robots, such as the QUANSER QBot 2, presents unique challenges in odometry and trajectory planning. This research focuses on building a unified simulation environment that bridges the gap between high-level Python control logic and low-level 3D visualization.
+
+\section{System Architecture}
+The system architecture follows a decoupled model-view-controller (MVC) pattern, utilizing WebSockets for low-latency bidirectional telemetry.
+
+\subsection{Differential Drive Kinematics}
+The QBot 2 is modeled as a differential drive robot. Its motion is defined by the independent velocities of the left ($v_L$) and right ($v_R$) wheels. The linear velocity $v$ and angular velocity $\omega$ of the robot's center of mass are:
+\begin{equation}
+    v = \frac{v_R + v_L}{2}, \quad \omega = \frac{v_R - v_L}{L}
+\end{equation}
+Where $L$ is the track width (distance between wheels). The state $[x, y, \theta]$ is updated using:
+\begin{equation}
+    x_{t+1} = x_t + v \cos(\theta) \Delta t, \quad y_{t+1} = y_t + v \sin(\theta) \Delta t, \quad \theta_{t+1} = \theta_t + \omega \Delta t
+\end{equation}
+This kinematic model ensures that the simulation accurately reflects the movement constraints of the physical QBot 2 hardware.
+
+\subsection{Backend: FastAPI and WebSocket Relay}
+The backend serves as a high-speed relay between the Python control script and the 3D visualization engine. Using \texttt{FastAPI} and \texttt{Uvicorn}, the server handles asynchronous WebSocket connections (\texttt{ws://0.0.0.0:8000/api/ws/sim}), allowing the robot to transmit its state and receive movement vectors in real-time.
+
+\subsection{Frontend: Three.js Visualization Engine}
+The frontend leverages \texttt{Three.js} for hardware-accelerated 3D rendering. It consists of three primary rendering targets:
+\begin{enumerate}
+    \item \textbf{Main Perspective View}: An overview of the maze and robot.
+    \item \textbf{FPV Camera}: A First-Person View rendered from the QBot 2's sensor perspective.
+    \item \textbf{3D Mapping View}: A dedicated secondary scene for SLAM reconstruction.
+\end{enumerate}
+
+\section{3D Mapping and SLAM Reconstruction}
+The core of the robot's spatial awareness is its mapping capability, which is divided into two distinct methodologies: Point Cloud accumulation and Voxel reconstruction.
+
+\subsection{LiDAR Raycasting Emulation}
+Spatial data is acquired through virtual LiDAR emulation. The system performs 144 radial raycasts (2.5° resolution) every frame. The intersection point $\mathbf{P}$ of each ray with the environment is calculated as:
+\begin{equation}
+    \mathbf{P} = \mathbf{O} + d \cdot \vec{\mathbf{D}}
+\end{equation}
+Where $\mathbf{O}$ is the sensor origin, $\vec{\mathbf{D}}$ is the normalized direction vector, and $d$ is the distance to the nearest collision.
+
+\subsection{Persistent Point Cloud}
+Each detected point $\mathbf{P}$ is added to a persistent buffer of $100,000$ points. This allows the robot to "remember" the structure of the room even after it has moved past a specific area. This data is rendered as a cyan point cloud in the dedicated Mapping Tab.
+
+\subsection{Voxel Environment Reconstruction}
+To provide a solid structural map, the system implements voxelization. The 3D space is divided into a grid of size $0.5m^3$. When a LiDAR point is detected within a grid cell $(v_x, v_y, v_z)$, the cell is marked as occupied:
+\begin{equation}
+    v_x = \lfloor x / s \rfloor, \quad v_y = \lfloor y / s \rfloor, \quad v_z = \lfloor z / s \rfloor
+\end{equation}
+\subsection{Simultaneous Localization and Mapping (SLAM)}
+The platform implements a simplified SLAM approach where localization is provided by simulated high-precision odometry, while mapping is performed through LiDAR integration.
+\begin{itemize}
+    \item \textbf{Global Consistency:} Points are transformed from the robot's local frame $\mathbf{L}$ to the world frame $\mathbf{W}$ using the transformation matrix:
+    \begin{equation}
+        \mathbf{P}_W = \mathbf{T}_{R \to W} \mathbf{P}_L
+    \end{equation}
+    \item \textbf{Noise Filtering:} The voxelization process acts as a spatial low-pass filter, reducing sensor noise and memory overhead by quantizing points into a discrete occupancy grid.
+\end{itemize}
+
+Where $s$ is the voxel size. Occupied cells are rendered using an \texttt{InstancedMesh} to ensure high performance while maintaining a solid visual representation of the mapped world.
+
+\section{Navigation and Path Planning}
+The QBot 2 utilizes the A* (A-Star) algorithm for collision-free routing through the maze.
+
+\subsection{A* Algorithm Implementation}
+The pathfinder calculates the optimal path from current coordinates to a waypoint by minimizing the cost function:
+\begin{equation}
+    f(n) = g(n) + h(n)
+\end{equation}
+Where:
+\begin{itemize}
+    \item $g(n)$ is the cost of the path from the start node to node $n$.
+    \item $h(n)$ is a heuristic estimate of the cost from $n$ to the goal (Manhattan distance).
+\end{itemize}
+
+\subsection{Search Space Discretization}
+The maze is discretized into a $20 \times 20$ navigation grid. Each cell is evaluated for its "traversability" based on the presence of wall meshes.
+\begin{itemize}
+    \item \textbf{Open Set:} A priority queue of nodes to be evaluated, sorted by $f(n)$.
+    \item \textbf{Closed Set:} Nodes already visited to prevent redundant cycles and infinite loops.
+    \item \textbf{Path Smoothing:} Once a grid-based path is found, the robot performs linear interpolation between nodes for smooth transitions.
+\end{itemize}
+
+\subsection{Collision Avoidance}
+Beyond global pathfinding, the robot maintains a local reactive layer. If the forward LiDAR distance drops below a safety threshold ($0.3m$), an emergency stop is triggered, and the global path is recalculated to avoid the obstruction.
+
+\section{Control API: qbot\_sim.py}
+A standalone Python SDK was developed to allow researchers to control the robot with minimal code. The API handles the complexity of asynchronous communication and telemetry parsing.
+
+\begin{lstlisting}[language=Python, caption=Sample Control Script]
+from qbot_sim import QBot2Sim
+
+robot = QBot2Sim()
+robot.reset()
+robot.log("Starting Patrol...")
+
+# Navigate to a specific coordinate
+robot.move_to(17.0, -17.0) 
+
+# Access sensor data
+pos = robot.get_position()
+lidar = robot.get_lidar_front()
+\end{lstlisting}
+
+\section{Real-World Applications}
+The simulation platform is designed for several high-impact research areas:
+\begin{itemize}
+    \item \textbf{Autonomous Surveillance}: Training robots to detect anomalies in industrial corridors.
+    \item \textbf{Hazardous Environment Mapping}: Building maps in areas inaccessible or dangerous for humans.
+    \item \textbf{Algorithmic Validation}: Rapid prototyping of new SLAM and pathfinding algorithms without the risk of hardware damage.
+\end{itemize}
+
+\section{Conclusion}
+The QUANSER QBot 2 simulation platform provides a robust environment for autonomous systems research. By separating the 3D mapping reconstruction into a dedicated SLAM view and implementing advanced pathfinding, the platform serves as a production-grade validation tool for complex robotic behaviors.
+
+\end{document}
