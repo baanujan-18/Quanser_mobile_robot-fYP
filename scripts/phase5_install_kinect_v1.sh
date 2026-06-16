@@ -12,7 +12,9 @@
 
 # This script documents the working Kinect v1 setup.
 
-# KinectV1-Ros2 was used instead of OpenNI2.
+# KinectV1-Ros2 was used instead of OpenNI2 because OpenNI2
+
+# did not work with Kinect v1 on this setup.
 
 # ============================================================
 
@@ -62,8 +64,9 @@ echo ""
 echo "============================================================"
 echo "KINECT TEST COMMANDS"
 echo "============================================================"
+
 echo ""
-echo "Run this in one terminal:"
+echo "Run this in TAB 1:"
 cat << 'EOF'
 cd ~/Ros2-KinectV1
 source /opt/ros/humble/setup.bash
@@ -73,7 +76,7 @@ ros2 run ros2_kinect_depth depth_node
 EOF
 
 echo ""
-echo "Run this in another terminal:"
+echo "Run this in TAB 2:"
 cat << 'EOF'
 source /opt/ros/humble/setup.bash
 source ~/Ros2-KinectV1/install/setup.bash
@@ -94,9 +97,17 @@ echo "average rate: around 30 Hz"
 
 echo ""
 echo "============================================================"
-echo "PHASE 5 RESULT"
+echo "IMPORTANT NOTES"
 echo "============================================================"
-echo "If /kinect/depth/image_raw publishes around 30 Hz,"
-echo "then Kinect v1 setup is completed successfully."
-echo "============================================================"
+echo "1. Run only one Kinect node at a time."
+echo "2. Do not run depth_node and rgb_node together."
+echo "3. If LIBUSB_ERROR_BUSY appears, run:"
+echo "   sudo modprobe -r gspca_kinect"
+echo ""
 
+echo "============================================================"
+echo "PHASE 5 COMPLETE CONDITION"
+echo "============================================================"
+echo "Phase 5 is successful when /kinect/depth/image_raw publishes"
+echo "depth data at around 30 Hz."
+echo "============================================================"
