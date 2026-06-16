@@ -1,41 +1,62 @@
-# FYP Setup Status
+# Setup Status
 
-## **Current Stage**
+## **Project**
 
-Completed up to **Phase 9 - SLAM Toolbox Mapping and Map Saving**.
-
-## **Overall Status**
-
-The Raspberry Pi, ROS 2 Humble, QBot 2 Kobuki base, Kinect v1 sensor, depth-to-laserscan conversion, robot description, robot state publisher, and SLAM Toolbox mapping pipeline are working successfully.
+**Quanser QBot 2 Autonomous Navigation System**
 
 ---
 
-## **Completed Work**
+## **Current Status**
 
-## **Phase 0 - Windows Laptop Setup**
+The project setup has been completed successfully up to:
 
-* MobaXterm installed and used for SSH connection.
-* X11 forwarding enabled for RViz2 visualization.
+```text id="jqibmd"
+Phase 9 - SLAM Toolbox Mapping
+```
 
----
-
-## **Phase 1 - Ubuntu 22.04 Setup**
-
-* Ubuntu 22.04 installed on Raspberry Pi 4.
-* Username configured as `kobuki`.
-* Raspberry Pi accessed using MobaXterm SSH.
+The robot can now build a 2D map using Kinect v1 depth data converted into laser scan data.
 
 ---
 
-## **Phase 2 - Ubuntu Update and Essential Tools**
+## **Completed Phases**
 
-* Ubuntu package list updated.
-* System packages upgraded.
-* Essential tools installed.
+### **Phase 0 - Project Preparation**
 
-Commands used:
+Completed.
 
-```bash
+Main work:
+
+* Selected Quanser QBot 2 as the robot platform.
+* Selected Raspberry Pi 4 as the onboard computer.
+* Selected Xbox Kinect v1 as the depth sensor.
+* Planned ROS 2 Humble-based navigation system.
+
+---
+
+### **Phase 1 - Ubuntu 22.04 Setup**
+
+Completed.
+
+Main work:
+
+* Installed Ubuntu 22.04 LTS on Raspberry Pi 4.
+* Configured the Raspberry Pi username as:
+
+```text id="p0ah4z"
+kobuki
+```
+
+* Connected to the Raspberry Pi from Windows using MobaXterm SSH.
+
+---
+
+### **Phase 2 - Essential Tools Installation**
+
+Completed.
+
+Main tools installed:
+
+```bash id="nc7wkv"
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y curl wget git build-essential python3-pip
@@ -43,89 +64,178 @@ sudo apt install -y curl wget git build-essential python3-pip
 
 ---
 
-## **Phase 3 - ROS 2 Humble Setup**
+### **Phase 3 - ROS 2 Humble Setup**
 
-* ROS 2 Humble repository added.
-* Corrected `dpkg --print-architecture` command used.
-* ROS 2 Humble base installed.
-* ROS 2 environment sourced.
-* Talker/listener test completed successfully.
+Completed.
 
----
+Main work:
 
-## **Phase 4 - Kobuki Driver Setup**
+* Added ROS 2 Humble repository.
+* Installed ROS 2 Humble base.
+* Installed ROS 2 build tools.
+* Tested ROS 2 using talker and listener nodes.
 
-* ROS 2 workspace created at `~/fyp_ws`.
-* Kobuki related packages cloned.
-* Dependencies installed using `rosdep`.
-* Workspace built using `colcon`.
-* QBot 2 connected through USB.
-* `/odom`, `/commands/velocity`, and `/joint_states` topics verified.
+Important corrected command:
 
----
+```text id="8rdz51"
+dpkg --print-architecture
+```
 
-## **Phase 5 - Kinect v1 Setup**
-
-* OpenNI2 was not used because it did not work with Kinect v1.
-* `KinectV1-Ros2` package was used instead.
-* `libfreenect` installed.
-* Kinect hardware detected using `lsusb`.
-* Kinect depth node launched successfully.
-* `/kinect/depth/image_raw` topic verified.
+There must be a space between `dpkg` and `--print-architecture`.
 
 ---
 
-## **Phase 6 - Depth to LaserScan**
+### **Phase 4 - Kobuki / QBot 2 Driver Setup**
 
-* `depthimage_to_laserscan` installed.
-* Camera info fixer script created.
-* Kinect depth topic converted to `/scan`.
-* `/scan` topic verified.
+Completed.
 
----
+Main work:
 
-## **Phase 7 - Robot Description**
+* Created ROS 2 workspace:
 
-* QBot 2 URDF file created.
-* `kinect_depth_frame` added to match the depth-to-scan output frame.
-* `qbot2_description` package created and built successfully.
+```text id="88gx0d"
+~/fyp_ws
+```
 
----
+* Cloned required Kobuki packages.
+* Installed dependencies using `rosdep`.
+* Built the workspace using `colcon`.
+* Connected QBot 2 through USB.
+* Launched Kobuki driver.
 
-## **Phase 8 - Robot State Publisher**
+Important working topics:
 
-* Robot State Publisher launch file created.
-* TF frames published successfully.
-
----
-
-## **Phase 9 - SLAM Toolbox Mapping**
-
-* SLAM Toolbox installed.
-* Full mapping pipeline launched using six MobaXterm tabs:
-
-  * Kobuki driver
-  * Kinect depth node
-  * Camera info fixer
-  * Depth to LaserScan
-  * Robot State Publisher
-  * SLAM Toolbox
-* `/odom`, `/scan`, `/tf`, `/tf_static`, `/map`, and `/map_metadata` verified.
-* Robot driven manually using teleop remapped to `/commands/velocity`.
-* Map viewed in RViz2.
-* Map saved using map saver.
-
----
-
-## **Important Working Topics**
-
-```text
+```text id="ectmt4"
 /odom
 /commands/velocity
 /joint_states
+```
+
+Important note:
+
+```text id="3412h1"
+QBot 2 uses /commands/velocity, not /cmd_vel.
+```
+
+---
+
+### **Phase 5 - Kinect v1 Setup**
+
+Completed.
+
+Main work:
+
+* Installed `libfreenect`.
+* Cloned and built `KinectV1-Ros2`.
+* Used Kinect v1 instead of OpenNI2.
+* Applied Kinect USB fix:
+
+```bash id="v72ekn"
+sudo modprobe -r gspca_kinect
+```
+
+Working Kinect topics:
+
+```text id="4j4ndk"
 /kinect/depth/image_raw
 /kinect/depth/camera_info
+```
+
+---
+
+### **Phase 6 - Depth to LaserScan Conversion**
+
+Completed.
+
+Main work:
+
+* Installed `depthimage_to_laserscan`.
+* Created camera info fixer script.
+* Published fixed camera info.
+* Converted Kinect depth data into `/scan`.
+
+Working pipeline:
+
+```text id="2a3zyf"
+Kinect depth image
+        ↓
+/kinect/depth/image_raw
+        ↓
+Camera info fixer
+        ↓
 /kinect/depth/camera_info_fixed
+        ↓
+depthimage_to_laserscan
+        ↓
+/scan
+```
+
+Important output topic:
+
+```text id="8z0zkg"
+/scan
+```
+
+---
+
+### **Phase 7 - Robot Description using URDF**
+
+Completed.
+
+Main work:
+
+* Created `qbot2_description` package.
+* Created `qbot2.urdf`.
+* Added robot base frames.
+* Added Kinect depth frame.
+
+Important frames:
+
+```text id="gmoyw8"
+base_footprint
+base_link
+camera_link
+kinect_depth_frame
+```
+
+---
+
+### **Phase 8 - Robot State Publisher**
+
+Completed.
+
+Main work:
+
+* Created `robot_state.launch.py`.
+* Launched Robot State Publisher.
+* Published TF frames from the URDF model.
+
+Working TF topics:
+
+```text id="6z0n73"
+/tf
+/tf_static
+```
+
+---
+
+### **Phase 9 - SLAM Toolbox Mapping**
+
+Completed successfully.
+
+Main work:
+
+* Installed SLAM Toolbox.
+* Started full mapping system.
+* Verified `/odom`, `/scan`, `/tf`, and `/map`.
+* Drove the robot manually using teleop.
+* Viewed the map in RViz2.
+* Saved the generated map.
+
+Required topics verified:
+
+```text id="tk7sus"
+/odom
 /scan
 /tf
 /tf_static
@@ -133,42 +243,120 @@ sudo apt install -y curl wget git build-essential python3-pip
 /map_metadata
 ```
 
----
+Map saved as:
 
-## **Current Saved Map**
+```text id="8r0dwj"
+lab_map.pgm
+lab_map.yaml
+```
 
-The map was saved using:
+Original map save command:
 
-```bash
+```bash id="v1y463"
+mkdir -p ~/maps
 ros2 run nav2_map_server map_saver_cli -f ~/maps/lab_map
 ```
 
-Expected saved files:
+---
 
-```text
-lab_map.pgm
-lab_map.yaml
+## **Current Working System**
+
+The current working system is:
+
+```text id="d58w8l"
+QBot 2 / Kobuki base
+        ↓
+/odom
+
+Kinect v1 depth sensor
+        ↓
+/kinect/depth/image_raw
+
+Camera info fixer
+        ↓
+/kinect/depth/camera_info_fixed
+
+Depth to LaserScan
+        ↓
+/scan
+
+Robot State Publisher
+        ↓
+/tf and /tf_static
+
+SLAM Toolbox
+        ↓
+/map
 ```
 
 ---
 
 ## **Current Result**
 
-The robot can successfully publish odometry, Kinect depth data, laser scan data, TF frames, and SLAM map data.
+The robot can:
 
-A 2D map was built using SLAM Toolbox by converting Kinect v1 depth data into `/scan`. The generated map was saved and is ready for the next phase of autonomous navigation using Nav2.
+* Start the Kobuki base driver.
+* Publish odometry.
+* Start the Kinect v1 depth node.
+* Convert Kinect depth data into `/scan`.
+* Publish TF frames.
+* Run SLAM Toolbox.
+* Build a 2D map.
+* Save the generated map.
+
+---
+
+## **Pending Phase**
+
+### **Phase 10 - Autonomous Navigation using Nav2**
+
+Not completed yet.
+
+Planned tasks:
+
+* Install Nav2.
+* Create Nav2 configuration file.
+* Load the saved map.
+* Start localization.
+* Open RViz2.
+* Set initial robot pose.
+* Send navigation goal.
+* Test autonomous movement.
+
+Planned map files:
+
+```text id="cc0qg4"
+maps/lab_map.pgm
+maps/lab_map.yaml
+```
+
+Planned Nav2 config file:
+
+```text id="boz9cp"
+ros2_ws/src/qbot2_navigation/config/nav2_params.yaml
+```
+
+Important note:
+
+```text id="s2w7kp"
+nav2_params.yaml will be added after Phase 10 testing.
+```
+
+---
+
+## **Overall Completion**
+
+```text id="p1nizr"
+Completed: Phase 0 to Phase 9
+Pending:   Phase 10 and final autonomous navigation testing
+```
 
 ---
 
 ## **Next Immediate Task**
 
-Start **Phase 10 - Autonomous Navigation with Nav2**.
+Start Phase 10:
 
-Next work:
-
-* Install Nav2.
-* Create `nav2_params.yaml`.
-* Launch Nav2 with the saved map.
-* Set `2D Pose Estimate` in RViz2.
-* Send `2D Nav Goal`.
-* Test autonomous navigation.
+```text id="v5raw3"
+Autonomous Navigation using Nav2 with the saved SLAM map
+```
