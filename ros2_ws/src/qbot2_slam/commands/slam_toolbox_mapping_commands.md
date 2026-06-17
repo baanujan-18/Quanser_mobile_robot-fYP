@@ -144,6 +144,7 @@ Purpose:
 ```bash
 source /opt/ros/humble/setup.bash
 source ~/fyp_ws/install/setup.bash
+
 ros2 launch slam_toolbox online_async_launch.py use_sim_time:=false
 ```
 
