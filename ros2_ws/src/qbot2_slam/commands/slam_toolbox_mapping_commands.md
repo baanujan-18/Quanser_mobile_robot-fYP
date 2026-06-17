@@ -56,7 +56,9 @@ Purpose:
 cd ~/Ros2-KinectV1
 source /opt/ros/humble/setup.bash
 source install/setup.bash
+
 sudo modprobe -r gspca_kinect
+
 ros2 run ros2_kinect_depth depth_node
 ```
 
