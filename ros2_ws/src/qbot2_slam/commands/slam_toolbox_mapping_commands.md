@@ -112,6 +112,7 @@ Purpose:
 ```bash
 source /opt/ros/humble/setup.bash
 source ~/fyp_ws/install/setup.bash
+
 ros2 launch qbot2_bringup depth_to_scan.launch.py
 ```
 
