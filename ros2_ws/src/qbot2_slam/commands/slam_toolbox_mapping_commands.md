@@ -83,6 +83,7 @@ During actual testing, the script was run from the home directory:
 
 ```bash
 source /opt/ros/humble/setup.bash
+
 python3 ~/fix_kinect_camera_info.py
 ```
 
