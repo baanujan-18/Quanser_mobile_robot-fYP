@@ -113,7 +113,14 @@ Purpose:
 source /opt/ros/humble/setup.bash
 source ~/fyp_ws/install/setup.bash
 
-ros2 launch qbot2_bringup depth_to_scan.launch.py
+ros2 run depthimage_to_laserscan depthimage_to_laserscan_node --ros-args \
+-r depth:=/kinect/depth/image_raw \
+-r depth_camera_info:=/kinect/depth/camera_info_fixed \
+-r scan:=/scan \
+-p scan_height:=10 \
+-p range_min:=0.45 \
+-p range_max:=4.0 \
+-p output_frame:=kinect_depth_frame
 ```
 
 Purpose:
