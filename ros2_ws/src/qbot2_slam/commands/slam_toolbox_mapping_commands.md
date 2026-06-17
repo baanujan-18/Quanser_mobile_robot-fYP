@@ -36,7 +36,10 @@ The full mapping system was launched using six MobaXterm tabs.
 ```bash
 source /opt/ros/humble/setup.bash
 source ~/fyp_ws/install/setup.bash
-ros2 launch kobuki_ros kobuki_node-launch.py
+
+sudo chmod 666 /dev/ttyUSB0
+
+ros2 launch kobuki_node kobuki_node-launch.py
 ```
 
 Purpose:
