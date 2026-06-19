@@ -146,6 +146,20 @@ Purpose:
 
 ---
 
+## Tab 5 - Laser Filter
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/fyp_ws/install/setup.bash
+
+ros2 run laser_filters scan_to_scan_filter_chain \
+--ros-args \
+--params-file /home/kobuki/fyp_ws/src/qbot2_bringup/config/laser_filter.yaml \
+-r scan:=/scan \
+-r scan_filtered:=/scan_filtered
+```
+---
+
 ## Tab 6 - SLAM Toolbox
 
 ```bash
