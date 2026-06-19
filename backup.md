@@ -20,12 +20,12 @@ Open Raspberry Pi Imager on Windows:
 - Choose OS → Other general-purpose OS → Ubuntu → Ubuntu Server 22.04 LTS 64-bit
 - Choose Storage → select your new SD card
 - Click gear icon (Advanced Settings):
-  - Hostname: `raspberrypi`
+  - Hostname: `pi`
   - Enable SSH: Yes
   - Username: `kobuki`
-  - Password: (same as your original password)
-  - WiFi SSID: your lab WiFi name
-  - WiFi Password: your lab WiFi password
+  - Password: (1809baanu)
+  - WiFi SSID: Baanu's iphone
+  - WiFi Password: 1801Baanu
   - WiFi Country: LK
 - Click Write → wait for it to finish
 
