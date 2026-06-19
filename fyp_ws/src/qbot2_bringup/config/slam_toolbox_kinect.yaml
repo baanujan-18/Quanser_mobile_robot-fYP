@@ -1,0 +1,29 @@
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: false
+
+    # Frames
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+
+    # Kinect scan range
+    max_laser_range: 4.0
+    minimum_time_interval: 0.2
+
+    # Reduce load on Raspberry Pi
+    throttle_scans: 6
+    map_update_interval: 2.0
+    transform_publish_period: 0.05
+
+    # TF tolerance
+    transform_timeout: 0.5
+    tf_buffer_duration: 30.0
+
+    # Mapping mode
+    mode: mapping
+    resolution: 0.05
+
+    # General settings
+    debug_logging: false

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot name="qbot2">
+
+  <!-- Ground reference frame -->
+  <link name="base_footprint"/>
+
+  <!-- Fixed joint from base_footprint to base_link -->
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.0102" rpy="0 0 0"/>
+  </joint>
+
+  <!-- QBot / Kobuki base -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.10" radius="0.178"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+  <!-- Kinect mounting position -->
+  <!-- Change z=0.28 to your actual Kinect height in metres -->
+  <joint name="kinect_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.05 0.0 0.28" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link"/>
+
+  <!-- Kinect depth frame -->
+  <!-- This must match your /scan frame_id: kinect_depth_frame -->
+  <joint name="kinect_depth_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="kinect_depth_frame"/>
+    <origin xyz="0 0.025 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <link name="kinect_depth_frame"/>
+
+</robot>
