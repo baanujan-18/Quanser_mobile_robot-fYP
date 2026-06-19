@@ -146,7 +146,7 @@ Purpose:
 
 ---
 
-## Tab 5 - Laser Filter
+## Tab 6 - Laser Filter
 
 ```bash
 source /opt/ros/humble/setup.bash
@@ -160,7 +160,7 @@ ros2 run laser_filters scan_to_scan_filter_chain \
 ```
 ---
 
-## Tab 6 - SLAM Toolbox
+## Tab 7 - SLAM Toolbox
 
 ```bash
 source /opt/ros/humble/setup.bash
